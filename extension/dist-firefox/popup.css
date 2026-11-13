@@ -69,3 +69,6 @@ button:hover { background: #000; }
 .ft { margin-top: 12px; padding-top: 8px; border-top: 2px solid var(--ink); font-size: 11px; color: var(--ink-2); }
 .ft p { margin: 0 0 4px; }
 .ft a { color: var(--ink); }
+
+.recheck { width: 100%; margin: 4px 0 10px; padding: 9px; font: 700 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; background: #141310; color: #ece6d9; border: 0; cursor: pointer; }
+.recheck:disabled { opacity: .6; cursor: progress; }

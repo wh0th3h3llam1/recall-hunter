@@ -16,7 +16,7 @@
       },
       getURL: (p) => p,
     },
-    tabs: { onRemoved: ev(), onUpdated: ev(), sendMessage: async () => null, query: async () => [{ id: 1 }] },
+    tabs: { onRemoved: ev(), onUpdated: ev(), sendMessage: (tabId, msg) => new Promise((res) => { const fn = listeners[listeners.length - 1]; if (!fn || fn(msg, {}, res) !== true) setTimeout(() => res(undefined), 50); }), query: async () => [{ id: 1 }] },
     action: { setBadgeText(o) { document.title = '[' + o.text + '] ' + document.title.replace(/^\[.*?\] /, ''); }, setBadgeBackgroundColor() {} },
   };
   window.chrome = api;

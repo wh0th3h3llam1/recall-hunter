@@ -55,7 +55,7 @@ async function childRecallIds(apiBase: string): Promise<Set<number> | null> {
   return new Set(ids);
 }
 
-async function handleMatch(site: string, page_url: string, products: Product[]): Promise<MatchReply> {
+async function handleMatch(site: string, page_url: string, products: Product[], force = false): Promise<MatchReply> {
   const settings = await getSettings();
   const base = settings.apiBase;
   const uniq = new Map<string, Product>();
@@ -67,7 +67,7 @@ async function handleMatch(site: string, page_url: string, products: Product[]):
   const todo: Product[] = [];
   for (const [id, p] of uniq) {
     const e = cached[cacheKey(site, id)];
-    if (fresh(e)) results.push(e.r);
+    if (!force && fresh(e)) results.push(e.r);
     else todo.push(p);
   }
 
@@ -79,7 +79,7 @@ async function handleMatch(site: string, page_url: string, products: Product[]):
       const body = await fetchJson(`${base}/v2/match`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ site, page_url, products: chunk }),
+        body: JSON.stringify({ site, page_url, products: chunk, force }),
       }, 15000);
       const got: MatchResult[] = Array.isArray(body?.results) ? body.results : [];
       const toStore: Record<string, CacheEntry> = {};
@@ -177,7 +177,7 @@ function setActionBadge(tabId: number, s: TabState) {
 async function route(msg: Msg, sender: chrome.runtime.MessageSender): Promise<unknown> {
   switch (msg.type) {
     case 'match':
-      return handleMatch(msg.site, msg.page_url, msg.products ?? []);
+      return handleMatch(msg.site, msg.page_url, msg.products ?? [], !!msg.force);
     case 'alternatives':
       return handleAlternatives(msg.recall_id, msg.title);
     case 'report': {

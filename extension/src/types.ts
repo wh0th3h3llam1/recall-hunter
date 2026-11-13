@@ -78,7 +78,7 @@ export interface TabState {
 
 // Messages content/popup -> background
 export type Msg =
-  | { type: 'match'; site: string; page_url: string; products: Product[] }
+  | { type: 'match'; site: string; page_url: string; products: Product[]; force?: boolean }
   | { type: 'alternatives'; recall_id: number; title: string }
   | { type: 'report'; state: TabState }
   | { type: 'getTabState'; tabId: number }

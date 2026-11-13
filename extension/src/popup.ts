@@ -120,6 +120,17 @@ async function checkGrant() {
 }
 
 $('api-test').addEventListener('click', () => testApi());
+$('recheck').addEventListener('click', async () => {
+  // Re-checks only the products on the current tab (supported store pages), skipping cached verdicts.
+  const b = $<HTMLButtonElement>('recheck');
+  const [tab] = await ext.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) return;
+  b.disabled = true; b.textContent = 'Re-checking…';
+  const ok = await ext.tabs.sendMessage(tab.id, { type: 'recheck' }).catch(() => null);
+  if (!ok) { b.textContent = 'Not a store page'; b.disabled = false; return; }
+  for (const ms of [1500, 4000, 12000]) setTimeout(tabCounts, ms);
+  setTimeout(() => { b.disabled = false; b.textContent = 'Re-check this page'; }, 12000);
+});
 renderSettings();
 tabCounts();
 testApi();

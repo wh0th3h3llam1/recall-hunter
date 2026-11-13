@@ -23,6 +23,8 @@ async function boot() {
   }
 }
 
+let forceNext = false; // set by the popup's "Re-check this page"
+
 if (!g.__recallGuardLoaded && document.documentElement) {
   g.__recallGuardLoaded = true;
   ext.storage.onChanged.addListener((changes, area) => {
@@ -30,6 +32,7 @@ if (!g.__recallGuardLoaded && document.documentElement) {
   });
   ext.runtime.onMessage.addListener((msg: any, _sender, sendResponse) => {
     if (msg?.type === 'getState') sendResponse(current ? { ...current.state } : null);
+    if (msg?.type === 'recheck') { forceNext = true; boot(); sendResponse({ ok: true }); }
   });
   boot();
 }
@@ -40,6 +43,8 @@ async function run(): Promise<Instance> {
   const site = siteName(adapter, loc);
   const settings: Settings = await getSettings();
   let disposed = false;
+  const force = forceNext;
+  forceNext = false;
 
   const seen = new WeakSet<Element>();
   const cardState = new Map<string, { refs: CardRef[]; result?: MatchResult }>();
@@ -82,7 +87,7 @@ async function run(): Promise<Instance> {
 
   async function sendMatch(products: Product[]): Promise<MatchReply | null> {
     try {
-      const reply = (await ext.runtime.sendMessage({ type: 'match', site, page_url: location.href, products })) as MatchReply;
+      const reply = (await ext.runtime.sendMessage({ type: 'match', site, page_url: location.href, products, force })) as MatchReply;
       if (reply?.offline) {
         state.offline = true;
         state.error = reply.error;

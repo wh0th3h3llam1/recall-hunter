@@ -180,6 +180,24 @@
     }
   }
   $("api-test").addEventListener("click", () => testApi());
+  $("recheck").addEventListener("click", async () => {
+    const b = $("recheck");
+    const [tab] = await ext.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) return;
+    b.disabled = true;
+    b.textContent = "Re-checking\u2026";
+    const ok = await ext.tabs.sendMessage(tab.id, { type: "recheck" }).catch(() => null);
+    if (!ok) {
+      b.textContent = "Not a store page";
+      b.disabled = false;
+      return;
+    }
+    for (const ms of [1500, 4e3, 12e3]) setTimeout(tabCounts, ms);
+    setTimeout(() => {
+      b.disabled = false;
+      b.textContent = "Re-check this page";
+    }, 12e3);
+  });
   renderSettings();
   tabCounts();
   testApi();

@@ -334,13 +334,13 @@ def _pid(p: dict) -> str:
 
 
 # ---------------------------------------------------------------- entry point
-async def match_products(site: str, products: list[dict], page_url: str = "") -> dict:
+async def match_products(site: str, products: list[dict], page_url: str = "", force: bool = False) -> dict:
     t0 = time.perf_counter()
     site = (site or "unknown").lower().strip()[:100]
     products = [p for p in (products or []) if isinstance(p, dict) and (p.get("title") or p.get("model") or p.get("upc"))][:40]
     pids = [_pid(p) for p in products]
     idx_task = asyncio.create_task(_index())
-    cache = await asyncio.to_thread(_cache_sync, site, list(set(pids))) if pids else {}
+    cache = await asyncio.to_thread(_cache_sync, site, list(set(pids))) if pids and not force else {}
     await idx_task
     by_id = _idx["by_id"]
 

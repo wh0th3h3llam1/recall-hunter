@@ -25,6 +25,7 @@ class Product(BaseModel):
 class MatchReq(BaseModel):
     site: str = "unknown"
     page_url: str = ""
+    force: bool = False  # "Re-check this page": skip the verdict cache
     products: list[Product] = Field(default_factory=list)
 
 
@@ -34,7 +35,7 @@ async def v2_match(req: MatchReq):
         raise HTTPException(413, "at most 40 products per request")
     from .match import match_products
     with obs.span("v2.match", f"{req.site} n={len(req.products)}"):
-        return await match_products(req.site, [p.model_dump() for p in req.products], req.page_url)
+        return await match_products(req.site, [p.model_dump() for p in req.products], req.page_url, force=req.force)
 
 
 @router.get("/alternatives")

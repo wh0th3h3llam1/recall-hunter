@@ -597,6 +597,7 @@ letter-spacing:.06em;text-transform:uppercase;padding:8px 10px 8px 12px;border-l
       console.debug("[Recall Guard]", e);
     }
   }
+  var forceNext = false;
   if (!g.__recallGuardLoaded && document.documentElement) {
     g.__recallGuardLoaded = true;
     ext.storage.onChanged.addListener((changes, area) => {
@@ -604,6 +605,11 @@ letter-spacing:.06em;text-transform:uppercase;padding:8px 10px 8px 12px;border-l
     });
     ext.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       if (msg?.type === "getState") sendResponse(current ? { ...current.state } : null);
+      if (msg?.type === "recheck") {
+        forceNext = true;
+        boot();
+        sendResponse({ ok: true });
+      }
     });
     boot();
   }
@@ -613,6 +619,8 @@ letter-spacing:.06em;text-transform:uppercase;padding:8px 10px 8px 12px;border-l
     const site = siteName(adapter, loc);
     const settings = await getSettings();
     let disposed = false;
+    const force = forceNext;
+    forceNext = false;
     const seen = /* @__PURE__ */ new WeakSet();
     const cardState = /* @__PURE__ */ new Map();
     const injected = /* @__PURE__ */ new Set();
@@ -651,7 +659,7 @@ letter-spacing:.06em;text-transform:uppercase;padding:8px 10px 8px 12px;border-l
     }
     async function sendMatch(products) {
       try {
-        const reply = await ext.runtime.sendMessage({ type: "match", site, page_url: location.href, products });
+        const reply = await ext.runtime.sendMessage({ type: "match", site, page_url: location.href, products, force });
         if (reply?.offline) {
           state.offline = true;
           state.error = reply.error;

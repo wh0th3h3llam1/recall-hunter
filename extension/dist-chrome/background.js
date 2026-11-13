@@ -63,7 +63,7 @@
     await ext.storage.local.set({ childSet: { t: Date.now(), ids, base: apiBase } });
     return new Set(ids);
   }
-  async function handleMatch(site, page_url, products) {
+  async function handleMatch(site, page_url, products, force = false) {
     const settings = await getSettings();
     const base = settings.apiBase;
     const uniq = /* @__PURE__ */ new Map();
@@ -74,7 +74,7 @@
     const todo = [];
     for (const [id, p] of uniq) {
       const e = cached[cacheKey(site, id)];
-      if (fresh(e)) results.push(e.r);
+      if (!force && fresh(e)) results.push(e.r);
       else todo.push(p);
     }
     let offline = false;
@@ -85,7 +85,7 @@
         const body = await fetchJson(`${base}/v2/match`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ site, page_url, products: chunk })
+          body: JSON.stringify({ site, page_url, products: chunk, force })
         }, 15e3);
         const got = Array.isArray(body?.results) ? body.results : [];
         const toStore = {};
@@ -176,7 +176,7 @@
   async function route(msg, sender) {
     switch (msg.type) {
       case "match":
-        return handleMatch(msg.site, msg.page_url, msg.products ?? []);
+        return handleMatch(msg.site, msg.page_url, msg.products ?? [], !!msg.force);
       case "alternatives":
         return handleAlternatives(msg.recall_id, msg.title);
       case "report": {

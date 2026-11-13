@@ -9,6 +9,8 @@ export default defineConfig({
     proxy: {
       '/api': { target: 'http://localhost:8000', changeOrigin: true },
       '/evidence': { target: 'http://localhost:8000', changeOrigin: true },
+      '/b2b': { target: 'http://localhost:8000', changeOrigin: true },
+      '/v2': { target: 'http://localhost:8000', changeOrigin: true },
     },
   },
   build: { outDir: 'dist', emptyOutDir: true, chunkSizeWarningLimit: 2000 },

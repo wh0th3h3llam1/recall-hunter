@@ -14,6 +14,18 @@ obs.init_sentry()
 app = FastAPI(title="Recall Hunter")
 _tasks: dict[str, asyncio.Task] = {}
 
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+
+# Browser extension (chrome-extension://, moz-extension://) and storefront content scripts call /v2.
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+for _mod in ("app.v2.router", "app.b2b.router"):
+    try:
+        import importlib
+        app.include_router(importlib.import_module(_mod).router)
+    except Exception as _e:  # router not built yet / import error: keep v1 running
+        print(f"[main] router {_mod} not loaded: {_e}")
+
 
 @app.on_event("startup")
 def _startup():

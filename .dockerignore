@@ -1,0 +1,10 @@
+.env
+.venv
+**/node_modules
+data
+web/dist
+web/_shots
+extension
+qa
+**/__pycache__
+.git

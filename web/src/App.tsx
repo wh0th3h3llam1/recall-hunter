@@ -13,6 +13,12 @@ import MapScene, { type HoverInfo } from './scene/MapScene';
 import Map2D from './scene/Map2D';
 import GLBoundary from './components/GLBoundary';
 import { hasWebGL, markWebGLBroken } from './webgl';
+import { b2b, type PlatformRow } from './b2b';
+import SellersView from './views/SellersView';
+import CasesView from './views/CasesView';
+
+type View = 'survey' | 'sellers' | 'cases';
+const TENANTS = ['ebay', 'amazon', 'fb_marketplace', 'google_shopping'];
 import { useHunt } from './useHunt';
 
 function useReducedMotion() {
@@ -32,6 +38,16 @@ const msg = (e: unknown) => String((e as Error)?.message ?? e);
 export default function App() {
   const reduced = useReducedMotion();
   const [webgl, setWebgl] = useState(() => hasWebGL());
+  const [view, setView] = useState<View>(() => {
+    const v = new URLSearchParams(location.search).get('view');
+    return v === 'sellers' || v === 'cases' ? v : 'survey';
+  });
+  const [platform, setPlatform] = useState<string | null>(null);
+  const [platforms, setPlatforms] = useState<PlatformRow[] | null>(null);
+  const [openCaseId, setOpenCaseId] = useState<string | number | null>(null);
+  useEffect(() => {
+    b2b.platforms().then((p) => setPlatforms(Array.isArray(p) ? p : []), () => setPlatforms(null));
+  }, []);
   const [childOnly, setChildOnly] = useState(false);
   const [recalls, setRecalls] = useState<Recall[] | null>(null);
   const [recallsErr, setRecallsErr] = useState<string | null>(null);
@@ -125,8 +141,10 @@ export default function App() {
 
   const enriched = useMemo(() => {
     if (!listings) return null;
-    return listings.map((l) => ({ ...l, hazard_class: l.hazard_class ?? recallCache.current.get(l.recall_id)?.hazard_class ?? 'other' }));
-  }, [listings, recalls]); // eslint-disable-line react-hooks/exhaustive-deps
+    return listings
+      .filter((l) => !platform || l.platform === platform)
+      .map((l) => ({ ...l, hazard_class: l.hazard_class ?? recallCache.current.get(l.recall_id)?.hazard_class ?? 'other' }));
+  }, [listings, recalls, platform]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const visible = useMemo(() => (enriched ?? []).filter((l) => l.final === 'CONFIRMED' || l.final === 'LIKELY' || (showRejected && l.final === 'REJECTED')), [enriched, showRejected]);
   const counts = useMemo(() => {
@@ -149,6 +167,10 @@ export default function App() {
   const closeEvidence = useCallback(() => setSelListing(null), []);
 
   const selRecallObj = selRecall != null ? recallCache.current.get(selRecall) : null;
+  const recallNumber = useCallback((id: number) => recallCache.current.get(id)?.recall_number ?? `#${id}`, [recalls]); // eslint-disable-line react-hooks/exhaustive-deps
+  const recallUrl = useCallback((id: number | null) => (id == null ? null : recallCache.current.get(id)?.url ?? null), [recalls]); // eslint-disable-line react-hooks/exhaustive-deps
+  const tenantOpts = platforms && platforms.length ? platforms.map((p) => p.platform) : TENANTS;
+  const glFail = useCallback(() => setWebgl(false), []);
   const apiDown = !!recallsErr && !!statsErr;
   const presentHazards = useMemo(() => [...new Set(visible.map((l) => l.hazard_class ?? 'other'))], [visible]);
 
@@ -168,9 +190,30 @@ export default function App() {
           <span className="brand-sep">/</span>
           <span className="brand-sub mono">LIVE MARKETPLACE SURVEILLANCE</span>
         </div>
+        <nav className="views" aria-label="Views">
+          {(['survey', 'sellers', 'cases'] as View[]).map((v) => (
+            <button key={v} className={view === v ? 'is-on' : ''} onClick={() => setView(v)} aria-current={view === v}>
+              {v.toUpperCase()}
+            </button>
+          ))}
+        </nav>
+        <label className="tenant">
+          <span className="micro dim">MONITORING</span>
+          <select value={platform ?? ''} onChange={(e) => setPlatform(e.target.value || null)} aria-label="Platform tenant">
+            <option value="">ALL PLATFORMS</option>
+            {tenantOpts.map((t) => {
+              const row = platforms?.find((p) => p.platform === t);
+              return (
+                <option key={t} value={t}>
+                  {platformLabel(t)}
+                  {row ? ` · ${row.open_cases} open` : ''}
+                </option>
+              );
+            })}
+          </select>
+        </label>
         <div className="bulletin mono">
-          <span>BULLETIN · {new Date().toISOString().slice(0, 10)}</span>
-          <span className="dim">SOURCE: U.S. CPSC RECALLS</span>
+          <span className="bul-date">BULLETIN · {new Date().toISOString().slice(0, 10)}</span>
           <span className={`link-dot ${apiDown ? 'down' : stats ? 'up' : 'wait'}`}>
             <i /> API {apiDown ? 'OFFLINE' : stats ? 'LINKED' : 'CONNECTING'}
           </span>
@@ -180,6 +223,10 @@ export default function App() {
         </button>
       </header>
 
+      {view === 'sellers' && <SellersView platform={platform} recallNumber={recallNumber} webgl={webgl} reduced={reduced} onGLFail={glFail} onOpenCase={(id) => { setOpenCaseId(id); setView('cases'); }} />}
+      {view === 'cases' && <CasesView platform={platform} reduced={reduced} openCaseId={openCaseId} onCaseOpened={() => setOpenCaseId(null)} recallUrl={recallUrl} />}
+
+      {view === 'survey' && (<>
       <RecallRail
         recalls={recalls}
         error={recallsErr}
@@ -288,6 +335,7 @@ export default function App() {
         runActive={runActive}
         reduced={reduced}
       />
+      </>)}
 
       {hover && !selListing && (
         <div className="tooltip" style={{ left: hover.x + 16, top: hover.y + 14 }}>

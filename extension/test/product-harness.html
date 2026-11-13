@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>DOM FIXTURE: product page (Recall Guard adapter test)</title>
+<!-- DOM FIXTURE FOR ADAPTER TESTING ONLY. Not Amazon, not a real listing. Mimics Amazon product-page ids
+     (#productTitle, input#ASIN, #bylineInfo, #ppd) so the product-page banner + alternatives can be exercised. -->
+<style>body{font-family:Arial,sans-serif;margin:0;color:#0f1111}.fixture-banner{background:#232f3e;color:#fff;padding:10px 16px;font-size:13px}
+.fixture-banner b{color:#febd69}#dp{max-width:1100px;margin:16px auto;padding:0 16px}#ppd{display:grid;grid-template-columns:360px 1fr;gap:24px}
+#main-image{width:360px;height:360px;background:#f7f7f7;display:flex;align-items:center;justify-content:center;color:#999}
+#productTitle{font-size:24px;font-weight:400}.a-price{font-size:28px}</style></head>
+<body><div class="fixture-banner"><b>DOM FIXTURE</b> for Recall Guard adapter testing. Mimics a product-page layout. Not a real store; the ASIN is fake.</div>
+<div id="dp"><input type="hidden" id="ASIN" value="B0FIXBODUM">
+<div id="ppd"><div id="main-image">Bodum</div><div>
+<span id="productTitle">Bodum Chambord French Press Coffee Maker, 8 Cup, 34 oz, Chrome</span>
+<div><a id="bylineInfo">Visit the Bodum Store</a></div>
+<div id="corePrice_feature_div"><span class="a-price"><span class="a-offscreen">$39.99</span>$39.99</span></div>
+<p>Add to Cart</p></div></div></div>
+<script src="shim.js"></script><script src="../dist/background.js"></script><script src="../dist/content.js"></script>
+</body></html>

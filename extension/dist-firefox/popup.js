@@ -85,7 +85,7 @@
       host = tab.url ? new URL(tab.url).hostname.replace(/^www\./, "") : "";
     } catch {
     }
-    $("tally-sub").textContent = !s ? host ? `Not active on ${host}.` : "Open a store page to start." : s.offline ? `${s.site}: engine offline, listings not checked.` : `${s.site}: ${s.checked} listing${s.checked === 1 ? "" : "s"} checked.`;
+    $("tally-sub").textContent = !s ? host ? `Not active on ${host}.` : "Open a store page to start." : s.offline ? `${s.site}: engine offline, listings not checked.` : `${s.site}: ${s.checked} listing${s.checked === 1 ? "" : "s"} checked.` + (s.hidden ? ` ${s.hidden} recall${s.hidden === 1 ? "" : "s"} hidden by the children's filter.` : "");
   }
   async function renderSettings() {
     const s = await getSettings();

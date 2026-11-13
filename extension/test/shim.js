@@ -2,6 +2,8 @@
 // code can be exercised against the DOM fixture. Messages are routed in-process.
 (function () {
   const store = {};
+  if (/[?&]child=1/.test(location.search)) store.settings = { apiBase: "http://localhost:8000", childOnly: true };
+  else store.settings = { apiBase: "http://localhost:8000" };
   const listeners = [];
   const ev = () => ({ addListener() {} });
   const api = {

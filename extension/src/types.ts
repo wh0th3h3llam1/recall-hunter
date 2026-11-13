@@ -29,6 +29,7 @@ export interface Recall {
   recall_date?: string;
   units?: string;
   image?: string;
+  is_child?: boolean;
 }
 
 export interface MatchResult {
@@ -72,6 +73,7 @@ export interface TabState {
   recalled: number;
   possible: number;
   checked: number;
+  hidden?: number; // flags hidden by "Children's products only"
   offline: boolean;
   error?: string;
 }

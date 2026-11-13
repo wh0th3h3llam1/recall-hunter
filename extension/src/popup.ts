@@ -23,7 +23,8 @@ async function tabCounts() {
     ? host ? `Not active on ${host}.` : 'Open a store page to start.'
     : s.offline
       ? `${s.site}: engine offline, listings not checked.`
-      : `${s.site}: ${s.checked} listing${s.checked === 1 ? '' : 's'} checked.`;
+      : `${s.site}: ${s.checked} listing${s.checked === 1 ? '' : 's'} checked.` +
+        (s.hidden ? ` ${s.hidden} recall${s.hidden === 1 ? '' : 's'} hidden by the children's filter.` : '');
 }
 
 async function renderSettings() {

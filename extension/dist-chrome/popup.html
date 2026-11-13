@@ -36,11 +36,16 @@
     <section class="block">
       <h2>01 · Sites</h2>
       <div id="sites"></div>
-      <label class="row"><span>Children's products only</span><input type="checkbox" id="child-only"><i class="sw"></i></label>
     </section>
 
     <section class="block">
-      <h2>02 · Engine</h2>
+      <h2>02 · Filter</h2>
+      <label class="row"><span>Only warn about children's products</span><input type="checkbox" id="child-only"><i class="sw"></i></label>
+      <p class="filter-note">Off by default. When on, recalls on other products (e.g. coffee makers, treadmills) are hidden.</p>
+    </section>
+
+    <section class="block">
+      <h2>03 · Engine</h2>
       <div class="api">
         <input id="api-base" type="url" spellcheck="false" aria-label="API base URL">
         <button id="api-test" type="button">Test</button>
@@ -49,7 +54,7 @@
     </section>
 
     <section class="block">
-      <h2>03 · Newest recalls</h2>
+      <h2>04 · Newest recalls</h2>
       <ol id="updates" class="updates"><li class="muted">Loading…</li></ol>
     </section>
 

@@ -108,7 +108,7 @@ def recall_card(r: dict | None) -> dict | None:
             "product_name": r.get("product_name"), "hazard": r.get("hazard"), "hazard_class": r.get("hazard_class"),
             "remedy": r.get("remedy"), "url": r.get("url"),
             "recall_date": r["recall_date"].isoformat() if r.get("recall_date") else None,
-            "units": r.get("units"), "image": imgs[0] if imgs else None}
+            "units": r.get("units"), "image": imgs[0] if imgs else None, "is_child": bool(r.get("is_child"))}
 
 
 # ---------------------------------------------------------------- stage 1

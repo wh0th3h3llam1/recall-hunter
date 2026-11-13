@@ -22,7 +22,7 @@
   var TTL_MS = 6 * 60 * 60 * 1e3;
   var TTL_POSSIBLE_MS = 10 * 60 * 1e3;
   var ALT_TTL_MS = 24 * 60 * 60 * 1e3;
-  var CHILD_TTL_MS = 6 * 60 * 60 * 1e3;
+  var CHILD_TTL_MS = 10 * 60 * 1e3;
   var MAX_BATCH = 40;
   var tabStates = /* @__PURE__ */ new Map();
   async function fetchJson(url, init = {}, timeoutMs = 1e4) {
@@ -105,11 +105,13 @@
       }
     }
     if (settings.childOnly) {
-      const kids = await childRecallIds(base);
+      const needList = results.some((r) => r.status !== "clean" && r.recall && typeof r.recall.is_child !== "boolean");
+      const kids = needList ? await childRecallIds(base) : /* @__PURE__ */ new Set();
       if (kids) {
         for (let i = 0; i < results.length; i++) {
           const r = results[i];
-          if (r.status !== "clean" && r.recall && !kids.has(r.recall.recall_id)) {
+          const isChild = typeof r.recall?.is_child === "boolean" ? r.recall.is_child : kids.has(r.recall?.recall_id ?? -1);
+          if (r.status !== "clean" && r.recall && !isChild) {
             results[i] = { ...r, status: "clean", recall: null, reason: "filtered: not a children's product" };
           }
         }

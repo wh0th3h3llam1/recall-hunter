@@ -6,7 +6,7 @@ import type { Alternative, MatchReply, MatchResult, Msg, Product, RecallUpdate, 
 const TTL_MS = 6 * 60 * 60 * 1000; // verdict cache: 6 h
 const TTL_POSSIBLE_MS = 10 * 60 * 1000; // "possible" may be upgraded by Stage 2 in the background; re-ask sooner
 const ALT_TTL_MS = 24 * 60 * 60 * 1000;
-const CHILD_TTL_MS = 6 * 60 * 60 * 1000;
+const CHILD_TTL_MS = 10 * 60 * 1000;
 const MAX_BATCH = 40;
 
 interface CacheEntry { r: MatchResult; t: number }
@@ -102,11 +102,14 @@ async function handleMatch(site: string, page_url: string, products: Product[], 
 
   // "Children's products only": hide flags on recalls that aren't children's products.
   if (settings.childOnly) {
-    const kids = await childRecallIds(base);
+    // Newer engine responses say per recall whether it's a children's product; older cached ones fall back to the list.
+    const needList = results.some((r) => r.status !== 'clean' && r.recall && typeof r.recall.is_child !== 'boolean');
+    const kids = needList ? await childRecallIds(base) : new Set<number>();
     if (kids) {
       for (let i = 0; i < results.length; i++) {
         const r = results[i];
-        if (r.status !== 'clean' && r.recall && !kids.has(r.recall.recall_id)) {
+        const isChild = typeof r.recall?.is_child === 'boolean' ? r.recall.is_child : kids.has(r.recall?.recall_id ?? -1);
+        if (r.status !== 'clean' && r.recall && !isChild) {
           results[i] = { ...r, status: 'clean', recall: null, reason: 'filtered: not a children\'s product' };
         }
       }

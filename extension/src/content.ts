@@ -59,14 +59,15 @@ async function run(): Promise<Instance> {
   const enabled = () => settings.sites[adapter.key] !== false;
 
   function recount() {
-    let recalled = 0, possible = 0, checked = 0;
+    let recalled = 0, possible = 0, checked = 0, hidden = 0;
     for (const s of cardState.values()) {
       if (!s.result) continue;
       checked++;
+      if (s.result.reason?.startsWith('filtered:')) hidden++;
       if (s.result.status === 'recalled') recalled++;
       else if (s.result.status === 'possible') possible++;
     }
-    Object.assign(state, { recalled, possible, checked });
+    Object.assign(state, { recalled, possible, checked, hidden });
     ext.runtime.sendMessage({ type: 'report', state: { ...state } }).catch(() => {});
   }
 

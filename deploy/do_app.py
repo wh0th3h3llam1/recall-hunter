@@ -10,7 +10,7 @@ API = "https://api.digitalocean.com/v2/apps"
 SECRET_KEYS = ["TIGER_DATABASE_URL", "BRIGHTDATA_API_TOKEN", "GEMINI_API_KEY", "DO_INFERENCE_KEY", "DO_SPACES_KEY",
                "DO_SPACES_SECRET", "SENTRY_DSN"]
 PLAIN_KEYS = ["BRIGHTDATA_UNLOCKER_ZONE", "BRIGHTDATA_SERP_ZONE", "GEMINI_MODEL_SCREEN", "GEMINI_MODEL_VISION",
-              "GEMINI_MODEL_JUDGE", "GEMINI_MODEL_EMBED", "DO_INFERENCE_BASE_URL", "DO_SPACES_BUCKET", "DO_SPACES_REGION"]
+              "GEMINI_MODEL_JUDGE", "GEMINI_MODEL_EMBED", "GEMINI_FORCE_MODEL", "DO_INFERENCE_BASE_URL", "DO_SPACES_BUCKET", "DO_SPACES_REGION"]
 envs = [{"key": k, "value": e[k], "type": "SECRET", "scope": "RUN_TIME"} for k in SECRET_KEYS if e.get(k)]
 envs += [{"key": k, "value": e[k], "scope": "RUN_TIME"} for k in PLAIN_KEYS if e.get(k)]
 envs += [{"key": "RH_BD_WAIT_S", "value": "90", "scope": "RUN_TIME"}]

@@ -19,6 +19,8 @@ M_SCREEN = env("GEMINI_MODEL_SCREEN", "gemini-3.5-flash-lite")
 M_VISION = env("GEMINI_MODEL_VISION", "gemini-3.5-flash")
 M_JUDGE = env("GEMINI_MODEL_JUDGE", "gemini-3.1-pro-preview")
 M_EMBED = env("GEMINI_MODEL_EMBED", "gemini-embedding-2")
+# When set, every Gemini text/vision call uses this one model (e.g. to ride out rate limits). Embeddings are unaffected.
+M_FORCE = env("GEMINI_FORCE_MODEL", "")
 DO_TOKEN = env("DO_API_TOKEN")
 DO_INFERENCE_KEY = env("DO_INFERENCE_KEY")
 DO_INFERENCE_BASE_URL = env("DO_INFERENCE_BASE_URL", "https://inference.do-ai.run/v1")

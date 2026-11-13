@@ -106,6 +106,7 @@ def _cost(model: str, usage) -> tuple[float, dict]:
 async def _gen(model: str, tag: str, contents, schema, records: int = 1, sample_extra: dict | None = None,
                thinking: str | None = None):
     """generate_content with structured JSON; logs every call. Returns (parsed_dict, latency_ms)."""
+    model = config.M_FORCE or model
     from google.genai import types
     kw = {"thinking_config": types.ThinkingConfig(thinking_level=thinking)} if thinking else {}
     cfg = types.GenerateContentConfig(response_mime_type="application/json", response_schema=schema, **kw)
@@ -319,6 +320,7 @@ async def _vision_contents(recall: dict, listing: dict, header: str):
 async def _gen_chain(chain: list[str], tag: str, contents, thinking, sample: dict):
     """Try models in order; a model that returns 404/403 (unavailable) or 429/503 (quota/overload) is skipped
     for a while so concurrent calls don't keep hammering it. Records which model answered."""
+    chain = [config.M_FORCE] if config.M_FORCE else chain  # one forced model: no fallback loop
     last = None
     for m in chain:
         if _dead.get(m, 0) > time.time():

@@ -220,7 +220,8 @@ async def _stage2_call(pairs: list[tuple[dict, dict]]) -> dict[int, dict]:
                      f"model={p.get('model') or ''!r} price={p.get('price') or ''!r}\n{_recall_brief(c['recall'])}")
     prompt = _S2_RULES + "\n\nPAIRS:\n" + "\n\n".join(lines)
     last = None
-    for model in (M_SCREEN, "gemini-4-hydrogen", M_VISION):
+    from ..config import M_FORCE
+    for model in ((M_FORCE,) if M_FORCE else (M_SCREEN, "gemini-4-hydrogen", M_VISION)):
         try:
             data, _ = await funnel._gen(model, "v2_match_stage2", prompt, S2Out, records=len(pairs),
                                         sample_extra={"n": len(pairs), "first": (pairs[0][0].get("title") or "")[:60]},

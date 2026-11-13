@@ -36,6 +36,7 @@ const HOSTS = [
   '*://*.ebay.com/*',
   '*://*.walmart.com/*',
   '*://*.target.com/*',
+  'https://*.ondigitalocean.app/*',
   'http://localhost:8000/*',
   'http://127.0.0.1:8000/*',
   '<all_urls>', // generic schema.org fallback + a configurable (deployed) API base

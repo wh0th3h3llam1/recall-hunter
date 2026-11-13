@@ -1,6 +1,15 @@
 # Recall Hunter
 
-**A product was recalled, and it's still for sale.** Recall Hunter takes each new U.S. CPSC recall, hunts the marketplaces for live
+**A product was recalled, and it's still for sale.** Recall Hunter ships as two products on one engine:
+
+| | Who | What |
+|---|---|---|
+| **Recall Guard** (`extension/`) | Shoppers (B2C) | A Chrome/Firefox extension that tags recalled products **while you scroll** Amazon, eBay, Walmart, Target or any schema.org store, warns "do not buy", and suggests safer alternatives |
+| **Trust & Safety console** (`web/`) | Marketplaces (B2B) | Finds recalled listings and the sellers behind them, opens a case per listing, drafts a takedown notice for a human to send, and re-checks that the listing came down |
+
+**Live:** console and API at https://recall-hunter-ay2po.ondigitalocean.app (DigitalOcean App Platform). The extension uses it by default.
+
+Under both: Recall Hunter takes each new U.S. CPSC recall, hunts the marketplaces for live
 listings with **Bright Data**, confirms matches with a three-tier **Gemini** funnel (text screen → photo comparison with a label
 bounding box → careful ruling), stores everything in **Tiger Data**, and shows the result as a 3D "hazard cartography" map.
 
@@ -18,6 +27,15 @@ RH_BD_WAIT_S=90 .venv/Scripts/python -m uvicorn app.main:app --port 8000
 Env (`.env`, gitignored): `TIGER_DATABASE_URL, BRIGHTDATA_API_TOKEN, BRIGHTDATA_UNLOCKER_ZONE, BRIGHTDATA_SERP_ZONE,
 GEMINI_API_KEY, GEMINI_MODEL_*, SENTRY_DSN, DO_*`.
 Cache replay (no network, for an offline demo): `RH_CACHE_ONLY=1`. It replays raw Bright Data responses captured live earlier.
+
+## v2 API
+- `POST /v2/match`: up to 40 store cards → `clean | possible | recalled`. Stage 1 runs on Tiger only (BM25 + brand/model rules over `rh.recall_index`), **p95 about 300 ms for 40 cards**. Stage 2 (Gemini) confirms candidates in the background and the result is cached for 7 days (`rh.product_verdicts`). Measured on the smoke set: precision 1.00, recall 1.00 after Stage 2.
+- `GET /v2/alternatives`: safer alternatives from Bright Data SERP Google Shopping, filtered against the recall index and cached for 24 h.
+- `/b2b/*`: platforms, sellers, cases (open → notified → removed → verified), SLA, CSV report, catalog CSV upload. Notices are drafted by DigitalOcean `openai-gpt-oss-120b`; **nothing is sent automatically**, and a human marks a case as sent. Verify re-checks the listing through the Bright Data Web Unlocker.
+- Full contract: `contracts/CONTRACTS_V2.md`. Smoke tests: `python -m app.v2._smoke`, `python -m app.b2b._smoke`.
+
+## Deploy
+`Dockerfile` (builds the web UI, runs uvicorn on :8080) → DigitalOcean App Platform via `deploy/do_app.py <branch>`, which sends secrets as encrypted SECRET env vars. `deploy/status.py --wait` shows the deployment phase and URL.
 
 ## Sponsor usage: what really runs
 | Sponsor | Used for | Status |

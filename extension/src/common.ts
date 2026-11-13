@@ -3,7 +3,7 @@ import type { Settings, SiteKey } from './types';
 // One API surface for Firefox (`browser`, promise-based) and Chrome (`chrome`, promise-based in MV3).
 export const ext: typeof chrome = (globalThis as any).browser ?? (globalThis as any).chrome;
 
-export const DEFAULT_API = 'http://localhost:8000';
+export const DEFAULT_API = 'https://recall-hunter-ay2po.ondigitalocean.app';
 
 export const DEFAULT_SETTINGS: Settings = {
   apiBase: DEFAULT_API,

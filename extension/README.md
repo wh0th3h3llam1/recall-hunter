@@ -11,7 +11,7 @@ cd extension && npm install && npm run build
 - **Chrome / Edge:** `chrome://extensions` → Developer mode → *Load unpacked* → `extension/dist-chrome`
 - **Firefox:** `about:debugging#/runtime/this-firefox` → *Load Temporary Add-on* → `extension/dist-firefox/manifest.json`
 
-Open the popup to set the API base (default `http://localhost:8000`, or the deployed DigitalOcean URL) and toggle sites.
+Open the popup to set the API base (default: the deployed `https://recall-hunter-ay2po.ondigitalocean.app`; use `http://localhost:8000` for a local server) and toggle sites.
 
 ## How it works
 1. A content script with per-site adapters (`src/adapters`) reads each product card: title, brand, price, image, ASIN/item id.
